@@ -1,0 +1,28 @@
+version: '3.1'
+
+volumes:
+  webgrab_config:
+  tvheadend_config:
+  tvheadend_recordings:
+
+services:
+  tvheadend:
+    image: linuxserver/tvheadend
+    depends_on:
+      - webgrabplus
+    restart: always
+    # We need to set the network mode to host or else
+    # TVH would not find any DVB inputs in the network.
+    # This is due to a mulitcast issue with docker. See
+    # https://github.com/moby/moby/issues/23659
+    network_mode: host
+    volumes:
+      - tvheadend_config:/config
+      - tvheadend_recordings:/recordings
+
+  webgrabplus:
+    image: linuxserver/webgrabplus
+    restart: always
+    volumes:
+      - '{{ dockerfiles_src_path }}/webgrabplus/config:/config'
+      - tvheadend_config:/data
